@@ -94,8 +94,8 @@ Targets to check (media files): 3821
 ```
 With a report in the end
 ```yaml
-Done. Checked: 3821, updated: 2974, no-change: 721, failed: 3.
-Pre-scan skips: unreadable_json=12, not_sidecar=184, no_match=96, no_ts=31
+Done. Checked: 3821, updated: 2977, no-change: 721, failed: 0.
+Pre-scan skips: unreadable_json=0, not_sidecar=0, no_match=0, no_ts=0
 ```
 
 ## Safety notes
