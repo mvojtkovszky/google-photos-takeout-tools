@@ -98,6 +98,89 @@ Done. Checked: 3821, updated: 2977, no-change: 721, failed: 0.
 Pre-scan skips: unreadable_json=0, not_sidecar=0, no_match=0, no_ts=0
 ```
 
+### deduplicate_media.py
+
+Remove duplicate media files from a Google Photos Takeout archive.
+This script finds **byte-identical** photos and videos and removes duplicates using simple and reliable rules.
+
+#### How duplicates are identified
+
+1. Files are grouped by size
+2. A fast partial hash narrows candidates
+3. A full SHA-256 hash confirms duplicates
+
+Only files that are **100% identical** are considered duplicates.
+
+#### Album vs non-album logic
+
+Folder names are ignored.
+
+- **Album folder**: contains a `metadata.json` file with a non-empty `title`
+- **Non-album folder**: does not contain `metadata.json`
+
+When the same media exists in both album and non-album folders, the script can decide which copy to keep.
+
+By default, the **non-album copy is kept** and album copies are removed.
+
+#### Usage
+
+Preview what would be deleted:
+```bash
+python deduplicate_media.py /path/to/Takeout --delete-duplicates --dry-run
+```
+
+Delete duplicates:
+```bash
+python deduplicate_media.py /path/to/Takeout --delete-duplicates
+```
+
+#### Album policy options
+Choose which copy to keep when album and non-album duplicates exist:
+
+Keep non-album copy (default):
+```bash
+--album-policy keep-non-album
+```
+
+Keep album copy:
+```bash
+--album-policy keep-album
+```
+
+Ignore album logic and use fallback selection:
+```bash
+--album-policy keep-default
+```
+
+#### Fallback keeper selection
+
+If multiple duplicates exist within the same category (all album or all non-album), the keeper is selected by:
+
+```bash
+--keep shortest   # default, shortest path
+--keep oldest     # oldest modification time
+--keep newest     # newest modification time
+```
+
+#### Sidecar JSON files
+
+When a duplicate media file is deleted, its related JSON sidecars are **also deleted by default**:
+
+- `filename.ext.json`
+- `filename.ext.supplemental-metadata.json`
+
+This keeps the archive consistent.
+
+#### Report file
+
+A TSV report is always written (default: `dedupe_report.tsv`).
+
+Example format:
+```
+sha256    keeper_path    duplicate_path
+```
+Each row records exactly which file was kept and which was removed (or would be removed).
+
 ## Safety notes
 
 - Files are modified **in place**
